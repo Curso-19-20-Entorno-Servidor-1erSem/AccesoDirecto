@@ -104,12 +104,12 @@ public class AccesoBD extends HttpServlet {
         
         
         try {
-            //Carga el controlador para acceder a la BD.
+            //Se Carga el controlador para acceder a la BD.
             Class.forName("com.mysql.jdbc.Driver");
-            //Realiza la conexión.
+            //Se Realiza la conexión.
             conexion = DriverManager.getConnection("jdbc:mysql://localhost:3306/pruebasjava","java2019","2019");
             sentencia = conexion.createStatement();
-            
+
             if (request.getParameter("unaAnilla") != null) {
 
                 sql = "select * from aves where anilla = ?";
@@ -140,7 +140,7 @@ public class AccesoBD extends HttpServlet {
                 while (resultado.next()) {
 
                     ave = new Ave();
-                    ave.setAnilla(resultado.getString("anilla"));
+                    ave.setAnilla(resultado.getString("anilla")); //Saca el resultado de la columna
                     ave.setEspecie(resultado.getString("especie"));
                     ave.setLugar(resultado.getString("lugar"));
                     ave.setFecha(resultado.getString("fecha"));
@@ -155,7 +155,7 @@ public class AccesoBD extends HttpServlet {
             ex.printStackTrace();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(AccesoBD.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
+        } finally {//Se cierra la sesión.
             try {
                 if (resultado != null) {
                     resultado.close();

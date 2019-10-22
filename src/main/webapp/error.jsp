@@ -9,9 +9,18 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <link rel="stylesheet" type="text/css" href="avesStyle.css" media="screen" />
+        <title>Error</title>
     </head>
     <body>
-        <h1>Hello World!</h1>
+        <div id="error">
+            
+            <p><%=request.getAttribute("error")%></p>
+
+
+
+            <br />
+            <p><a href="<%= request.getContextPath()%>">Volver</a></p>
+        </div>
     </body>
 </html>
