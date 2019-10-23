@@ -13,11 +13,11 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" type="text/css" href="avesStyle.css" media="screen" />
-        <title>JSP Page</title>
+        <title>Listado de Aves.</title>
     </head>
     <body>
         <div id="contenido">
-            <h2>Listado de todas las aves de la base de datos</h2>
+            <h2>Listado de Aves.</h2>
             <table>
                 <%
                     List<Ave> listado = null;
