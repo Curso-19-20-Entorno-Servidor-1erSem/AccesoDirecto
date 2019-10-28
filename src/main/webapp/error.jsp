@@ -13,14 +13,8 @@
         <title>Error</title>
     </head>
     <body>
-        <div id="error">
-            
-            <p><%=request.getAttribute("error")%></p>
-
-
-
-            <br />
-            <p><a href="<%= request.getContextPath()%>">Volver</a></p>
-        </div>
+        <h2><%=request.getAttribute("error")%> </h2>
+        <br>
+        <a href="index.html">Volver</a>
     </body>
 </html>

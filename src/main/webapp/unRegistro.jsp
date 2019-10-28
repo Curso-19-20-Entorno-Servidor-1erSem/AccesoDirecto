@@ -10,19 +10,15 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" type="text/css" href="avesStyle.css" media="screen" />
-        <title>Resultados</title>
+        <title>Datos del ave.</title>
     </head>
     <body>
         <div id="contenido">
-            <h2>Salida de resultados para la anilla <%=request.getAttribute("anilla")%></h2>
-            <p>La especie es: <%=request.getAttribute("especie")%></p>
-            <p>se encuentra en: <%=request.getAttribute("lugar")%></p>
-            <p>en la fecha: <%=request.getAttribute("fecha")%></p>
-
-
-
-            <br />
-            <p><a href="<%= request.getContextPath()%>">Volver</a></p>
+        <h1>Datos del ave</h1>
+        
+        <p><%=request.getAttribute("una").toString()%> </p>
+        
+        <a href="index.html">Volver</a>
         </div>
     </body>
 </html>

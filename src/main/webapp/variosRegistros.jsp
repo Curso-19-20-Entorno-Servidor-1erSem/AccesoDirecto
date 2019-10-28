@@ -17,29 +17,15 @@
     </head>
     <body>
         <div id="contenido">
-            <h2>Listado de Aves.</h2>
-            <table>
-                <%
-                    List<Ave> listado = null;
-                    listado = new ArrayList();
-                    listado = (ArrayList<Ave>) request.getAttribute("lista");
-                    for (Ave pajaro : listado) {
+        <h1>Listado de aves</h1>
+        <%ArrayList<Ave> aves=(ArrayList)request.getAttribute("aves");
+            for(Ave a:aves){
                 %>
-                <tr>
-                    <td><%=pajaro.getAnilla()%></td>
-                    <td><%=pajaro.getEspecie()%></td>
-                    <td><%=pajaro.getLugar()%></td>
-                    <td><%=pajaro.getFecha()%></td>
-                </tr>
+                <p><%=a.toString()%></p>
                 <%
-                    }
-                %>
-            </table>
-
-
-
-            <br />
-            <p><a href="<%= request.getContextPath()%>">Volver</a></p>
+            }
+        %>
+        <a href="index.html">Volver</a>
         </div>
     </body>
 </html>

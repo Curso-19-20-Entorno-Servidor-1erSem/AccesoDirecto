@@ -5,11 +5,10 @@
  */
 package es.albarregas.persistencia;
 
-
-
+import com.mysql.jdbc.StringUtils;
 import es.albarregas.beans.Ave;
 import java.io.IOException;
-
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -25,7 +24,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 
 /**
  *
@@ -34,125 +32,176 @@ import javax.sql.DataSource;
 @WebServlet(name = "AccesoBD", urlPatterns = {"/AccesoBD"})
 public class AccesoBD extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
+/**
+     * Handles the HTTP <code>GET</code> method.
      *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-         response.setContentType("text/html;charset=UTF-8");
-
-    }
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        doPost(request, response);
     }
 
-
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
     @Override
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-         processRequest(request, response);
+
         Connection conexion = null;
         Statement sentencia = null;
         PreparedStatement preparada = null;
         ResultSet resultado = null;
+
         Ave ave = null;
-        List<Ave> listado = null;
+        ArrayList<Ave> aves = null;
 
-        String anilla = request.getParameter("anilla");
-        String sql = null;
-        String url = null;
-        
-
-        
-        
-        
         try {
-            //Se Carga el controlador para acceder a la BD.
             Class.forName("com.mysql.jdbc.Driver");
-            //Se Realiza la conexión.
-            conexion = DriverManager.getConnection("jdbc:mysql://localhost:3306/pruebasjava","java2019","2019");
-            sentencia = conexion.createStatement();
+        } catch (ClassNotFoundException ex) {
+            System.out.println("No existe el driver");
+            ex.printStackTrace();
+        }
 
-            if (request.getParameter("unaAnilla") != null) {
+        String cadenaConexion = "jdbc:mysql://localhost:3306/pruebasjava";
+        String anilla = request.getParameter("una");
+        String url = null;
+        String sql = null;
 
-                sql = "select * from aves where anilla = ?";
-                preparada = conexion.prepareStatement(sql);
-                preparada.setString(1, anilla);
+        try {
+            conexion = DriverManager.getConnection(cadenaConexion, "java2019", "2019");
+
+            if (request.getParameter("anilla") != null) {
+                if (anilla != null && anilla != "") {
+
+                    try {
+                        if (Integer.parseInt(anilla) > 0) {
+                            sql = "select * from aves where anilla=?";
+                            preparada = conexion.prepareStatement(sql);
+                            preparada.setString(1, anilla);
+
+                            resultado = preparada.executeQuery();
+                            if (resultado.next()) {
+                                ave = new Ave();
+                                ave.setAnilla(resultado.getString(1));
+                                ave.setEspecie(resultado.getString(2));
+                                ave.setLugar(resultado.getString(3));
+                                ave.setFecha(resultado.getString(4));
+                                request.setAttribute("una", ave);
+                                url = "unRegistro.jsp";
+                                resultado.close();
+                                preparada.close();
+                                conexion.close();
+                            } else {
+                                url = "error.jsp";
+                                request.setAttribute("error", "La anilla no existe");
+                            }
+
+                        } else {
+                            url = "error.jsp";
+                            request.setAttribute("error", "Introduce un nº válido");
+                        }
+                    } catch (NumberFormatException e) {
+                        url="error.jsp";
+                        request.setAttribute("error", "Introduce nº");
+                    }
+
+                } else {
+                    url = "error.jsp";
+                    request.setAttribute("error", "Introduce nº");
+                }
+            }
+
+            if (request.getParameter("todas") != null) {
+                sql = "select * from aves";
+                try {
+                    preparada = conexion.prepareStatement(sql);
+                } catch (SQLException ex) {
+                    Logger.getLogger(AccesoBD.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 try {
                     resultado = preparada.executeQuery();
-
-                    resultado.next();
-                    url = "unResultado.jsp";
-                    request.setAttribute("anilla", resultado.getString("anilla"));
-                    request.setAttribute("especie", resultado.getString("especie"));
-                    request.setAttribute("lugar", resultado.getString("lugar"));
-                    request.setAttribute("fecha", resultado.getString("fecha"));
+                    aves = new ArrayList<Ave>();
+                    while (resultado.next()) {
+                        ave = new Ave();
+                        ave.setAnilla(resultado.getString(1));
+                        ave.setEspecie(resultado.getString(2));
+                        ave.setLugar(resultado.getString(3));
+                        ave.setFecha(resultado.getString(4));
+                        aves.add(ave);
+                    }
+                    request.setAttribute("aves", aves);
+                    url = "varios.jsp";
                 } catch (SQLException e) {
+                    System.out.println("Error");
+                    System.out.println(e);
+                }
+            }
+            if (request.getParameter("algunas") != null && !request.getParameter("algunas").equals("")) {
 
+                try {
+                    int numero = Integer.parseInt(anilla);
+                    if (numero > 0) {
+                        try {
+                            sql = "select * from aves order by rand() limit " + numero;
+                            sentencia = conexion.createStatement();
+                            resultado = sentencia.executeQuery(sql);
+                            aves = new ArrayList<Ave>();
+                            while (resultado.next()) {
+                                ave = new Ave();
+                                ave.setAnilla(resultado.getString(1));
+                                ave.setEspecie(resultado.getString(2));
+                                ave.setLugar(resultado.getString(3));
+                                ave.setFecha(resultado.getString(4));
+                                aves.add(ave);
+                            }
+                            request.setAttribute("aves", aves);
+                            url = "varios.jsp";
+                        } catch (SQLException e) {
+                            request.setAttribute("error", "Error al acceder a la tabla");
+                            url = "error.jsp";
+                        }
+                    } else {
+                        url = "error.jsp";
+                        request.setAttribute("error", "El nº tiene que se mayor que 0");
+                    }
+
+                } catch (NumberFormatException e) {
+                    System.out.println("Error");
+                    System.out.println(e);
+                    request.setAttribute("error", "Tienes que introducir un nº");
                     url = "error.jsp";
-                    request.setAttribute("error", "La anilla " + anilla
-                            + " no existe en la base de datos");
                 }
-            } else {
-                sql = "select * from aves";
-                sentencia = conexion.createStatement();
-                resultado = sentencia.executeQuery(sql);
-                listado = new ArrayList();
-                url = "listaResultado.jsp";
-
-                while (resultado.next()) {
-
-                    ave = new Ave();
-                    ave.setAnilla(resultado.getString("anilla")); //Saca el resultado de la columna
-                    ave.setEspecie(resultado.getString("especie"));
-                    ave.setLugar(resultado.getString("lugar"));
-                    ave.setFecha(resultado.getString("fecha"));
-                    listado.add(ave);
-                }
-                request.setAttribute("lista", listado);
             }
 
-            request.getRequestDispatcher(url).forward(request, response);
         } catch (SQLException ex) {
-            System.out.println("Error al crear la conexión");
+            System.out.println("El código de error es " + ex.getErrorCode());
             ex.printStackTrace();
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(AccesoBD.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {//Se cierra la sesión.
-            try {
-                if (resultado != null) {
-                    resultado.close();
-                }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            try {
-                if (preparada != null) {
-                    preparada.close();
-                }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            try {
-                if (conexion != null) {
-                    conexion.close();
-                }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
         }
+
+        request.getRequestDispatcher(url).forward(request, response);
+
     }
 
-
+    /**
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
 
 }
